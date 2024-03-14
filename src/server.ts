@@ -5,7 +5,7 @@ import bodyParser from 'body-parser';
 import routes from './routes/routes';
 import swaggerUi from 'swagger-ui-express';
 import YAML from 'yamljs'; 
-
+import cors from 'cors'; 
 
 dotenv.config();
 
@@ -14,6 +14,9 @@ const PORT = process.env.PORT || 7000;
 const MONGO_URL = `mongodb+srv://shebz:shebz123@cluster0.iwskxk4.mongodb.net/blogdb?retryWrites=true&w=majority`;
 
 app.use(bodyParser.json());
+
+// Enable CORS
+app.use(cors());
 
 // swagger
 const swaggerJsDocs = YAML.load('./api.yaml'); 
@@ -42,5 +45,4 @@ mongoose.connect(MONGO_URL)
         console.error('MongoDB Connection Error: ', err);
     });
 
-
-    export default app;
+export default app;

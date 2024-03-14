@@ -1,7 +1,4 @@
 "use strict";
-// import { Request, Response } from 'express';
-// import bcrypt from 'bcrypt';
-// import User, { UserDocument } from '../models/User';
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -71,7 +68,7 @@ const login = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         });
         res.status(200)
             .header('Authorization', `Bearer ${token}`)
-            .send({ message: 'Login successful!!', token: token });
+            .send({ message: 'Login successful!!', token: token, role: user.role, email: user.email });
     }
     catch (error) {
         console.error('Error logging in:', error);

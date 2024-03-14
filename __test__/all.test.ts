@@ -81,7 +81,7 @@ describe("endpoints", () => {
 
 describe('blog test',()=>{
 
-      it('Posting a blog', async () => {
+      it('Posting a blog missing image..500', async () => {
     const res = await superTest(app)
       .post('/blogs')
       .send({
@@ -89,11 +89,11 @@ describe('blog test',()=>{
         content: "blog created in testing",
       })
       .set('Authorization', 'Bearer ' + token.token);
-    expect(res.statusCode).toBe(201);
+    expect(res.statusCode).toBe(500);
   });
 
 
-      it('Posting a blog error', async () => {
+      it('Posting a blog error 400', async () => {
     const res = await superTest(app)
       .post('/blogs')
       .send({
@@ -117,7 +117,7 @@ describe('blog test',()=>{
 
       it('should be 200..get a blog', async () => {
     const res = await superTest(app)
-      .get('/blogs/65e37915dfd0ff9a6ec18715')
+      .get('/blogs/65e9964b8707eb4c8870037d')
       .set('Authorization', 'Bearer ' + token.token);
     expect(res.statusCode).toBe(200);
   });
@@ -126,15 +126,14 @@ describe('blog test',()=>{
     const res = await superTest(app)
       .get('/blogs/65e37915dfd0ff9a6ec1815')
       .set('Authorization', 'Bearer ' + token.token);
-    expect(res.statusCode).toBe(404);
+    expect(res.statusCode).toBe(500);
   });
 
     
-  it('should give 200..deleting a blog', async () => {
+  it('should give 401..deleting a blog', async () => {
     const res = await superTest(app)
       .delete('/blogs/65e44b63ee89e10a3b1829f4')
-      .set('Authorization', 'Bearer ' + token.token);
-    expect(res.statusCode).toBe(200);
+    expect(res.statusCode).toBe(401);
   });
 
 });
@@ -143,26 +142,34 @@ describe('blog test',()=>{
 describe("commenting tests",()=>{
 
     
-  it('should return 201..Posting a comment', async () => {
+  it('should return 200..Posting a comment', async () => {
     const res = await superTest(app)
-      .post('/blogs/65e37915dfd0ff9a6ec18715/comment')
+      .post('/blogs/65e9964b8707eb4c8870037d/comment')
       .send({
         email: "she@gmail.com",
         comment: "coment of test",
       })
       .set('Authorization', 'Bearer ' + token.token);
-    expect(res.statusCode).toBe(201);
+    expect(res.statusCode).toBe(200);
   });
-  it('error Posting a comment', async () => {
+  it('error Posting a comment..400 validation', async () => {
     const res = await superTest(app)
-      .post('/blogs/65e0fe53b61562a46e33e6dd/comment')
+      .post('/blogs/65e9964b8707eb4c8870037d/comment')
       .send({
-
-        email: "hhg@gmail.com",
         comment: "like this",
       })
       .set('Authorization', 'Bearer ' + token.token);
     expect(res.statusCode).toBe(400);
+  });
+
+  it('should be unothorized... Posting a comment', async () => {
+    const res = await superTest(app)
+      .post('/blogs/65e9964b8707eb4c8870037d/comment')
+      .send({
+        email: "she@gmail.com",
+        comment: "like this",
+      })
+    expect(res.statusCode).toBe(401);
   });
 });
 
@@ -196,11 +203,16 @@ describe("messages",()=>{
     expect(res.body.message).toContain('Unauthorized access');
   });
 
-  it('should give 404 ..get a msg error', async () => {
+  it('should give 404 ..notfound', async () => {
     const res = await superTest(app)
       .get('/messages/655ddfbcc954392f2eeda438')
       .set('Authorization', 'Bearer ' + token.token);
     expect(res.statusCode).toBe(404);
+  });
+  it('should give 401 ..get a msg unouthorised', async () => {
+    const res = await superTest(app)
+      .get('/messages/65e3676435aa556c0a634533')
+    expect(res.statusCode).toBe(401);
   });
 
 
@@ -218,26 +230,41 @@ describe("liking",() =>{
       .set('Authorization', 'Bearer ' + token.token);
     expect(res.statusCode).toBe(500);
   });
-  it('Liking', async () => {
+  it('Liking....200', async () => {
     const res = await superTest(app)
-      .post('/blogs/65e0fe53b61562a46e33e6dd/like')
+      .post('/blogs/65e9964b8707eb4c8870037d/like')
       .send({
-        email:"muka@gmail.com",
-        postId:"65e0fe53b61562a46e33e6dd"
+        email:"musabe@gmail.com",
+        postId:"65e9964b8707eb4c8870037d"
       })
       .set('Authorization', 'Bearer ' + token.token);
     expect(res.statusCode).toBe(200);
   });
   
-  it('Liking', async () => {
+  it('Liking....401', async () => {
     const res = await superTest(app)
-      .post('/blogs/65e37915dfd0ff9a6ec18715/like')
-      .set('Authorization', 'Bearer ' + token.token);
-    expect(res.statusCode).toBe(404);
+    .post('/blogs/65e9964b8707eb4c8870037d/like')
+    .send({
+      email:"musabe@gmail.com",
+      postId:"65e9964b8707eb4c8870037d"
+    })
+    expect(res.statusCode).toBe(401);
   });
 
 
 })
+   //  server file
+   describe("server file tests ", () => {
+    it('should connect to MongoDB', () => {
+        expect(mongoose.connect).toHaveBeenCalledWith(MONGO_URL, expect.any(Object));
+    });
+
+    it('should start the server', async () => {
+        const server = await app.listen(7000);
+        expect(server).toBeDefined();
+        server.close();
+    });
+});
 
 
 

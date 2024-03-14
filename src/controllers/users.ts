@@ -1,75 +1,4 @@
-// import { Request, Response } from 'express';
-// import bcrypt from 'bcrypt';
-// import User, { UserDocument } from '../models/User';
 
-// export const createUser = async (req: Request, res: Response) => {
-//   try {
-//     const { username, email, password }: { username: string, email: string, password: string } = req.body;
-//     const lowercaseEmail = email.toLowerCase();
-
-//     const existingUser = await User.findOne({ email: lowercaseEmail });
-
-//     if (existingUser) {
-//       return res.status(400).json({ error: 'User already exists' });
-//     }
-
-//     const hashedPassword = await bcrypt.hash(password, 10);
-
-//     const newUser = new User({
-//       username,
-//       email: lowercaseEmail,
-//       password: hashedPassword,
-//       role: 'user',
-//     });
-
-//     const savedUser = await newUser.save();
-//     res.status(201).json({ message: 'Account created successfully' });
-//   } catch (error) {
-//     res.status(500).json({ error: 'Failed to create user' });
-//   }
-// };
-
-
-// export const deleteUserByEmail = async (req: Request, res: Response) => {
-//   try {
-//     let userEmail = req.params.email;
-//     userEmail = userEmail.toLowerCase();
-//     const deletedUser = await User.findOneAndDelete({ email: userEmail });
-
-//     if (deletedUser) {
-//       res.status(200).json({ message: 'User deleted successfully' });
-//     } else {
-//       res.status(404).json({ error: 'User not found' });
-//     }
-//   } catch (error) {
-//     res.status(500).json({ error: 'Failed to delete user' });
-//   }
-// };
-
-// export const login = async (req: Request, res: Response) => {
-//   try {
-//     let { email, password } = req.body;
-//     email = email.toLowerCase();
-//     const user: UserDocument | null = await User.findOne({ email }); 
-
-//     if (user && user.password && (await bcrypt.compare(password, user.password))) {
-//       res.status(200).json({ message: 'Login successful' });
-//     } else {
-//       res.status(401).json({ error: 'Invalid email or password' });
-//     }
-//   } catch (error) {
-//     res.status(500).json({ error: 'Login failed' });
-//   }
-// };
-
-// export const getAllUsers = async (req: Request, res: Response) => {
-//   try {
-//     const users = await User.find();
-//     res.status(200).json(users);
-//   } catch (error) {
-//     res.status(500).json({ error: 'Failed to retrieve users' });
-//   }
-// };
 import { Request, Response } from 'express';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
@@ -141,7 +70,7 @@ export const login = async (req: Request, res: Response) => {
 
     res.status(200)
       .header('Authorization', `Bearer ${token}`)
-      .send({ message: 'Login successful!!', token: token });
+      .send({ message: 'Login successful!!', token: token , role: user.role ,email: user.email });
   } catch (error) {
     console.error('Error logging in:', error);
     res.status(500).json({ message: 'Internal server error' });
