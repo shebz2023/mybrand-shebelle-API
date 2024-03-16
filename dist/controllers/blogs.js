@@ -78,7 +78,21 @@ const getBlogById = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
 exports.getBlogById = getBlogById;
 const updateBlogById = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const updatedBlog = yield Blog_1.default.findByIdAndUpdate(req.params.id, req.body, { new: true });
+        const { title, content } = req.body;
+        const { error } = blogs_1.blogVal.validate(req.body);
+        if (error) {
+            return res.status(400).send({ error: error.details[0].message });
+        }
+        let image = null;
+        if (req.file) {
+            const result = yield cloudinary_1.default.uploader.upload(req.file.path);
+            console.log('Cloudinary upload result:', result);
+            image = result ? result.secure_url : null;
+        }
+        const updatedBlog = yield Blog_1.default.findByIdAndUpdate(req.params.id, { title, content, image }, { new: true });
+        if (!updatedBlog) {
+            return res.status(404).json({ error: 'Blog post not found' });
+        }
         res.send({ updatedBlog, message: 'Blog updated!' });
     }
     catch (err) {

@@ -67,13 +67,35 @@ export const getBlogById = async (req: Request, res: Response) => {
 };
 
 export const updateBlogById = async (req: Request, res: Response) => {
-    try {
-        const updatedBlog = await Blog.findByIdAndUpdate(req.params.id, req.body, { new: true });
-        res.send({ updatedBlog, message: 'Blog updated!' });
-      } catch (err: any) {
-        return res.status(500).send({ message: (err as Error).message });
-      }
+  try {
+    const { title, content } = req.body;
+    const { error } = blogVal.validate(req.body);
+    if (error) {
+      return res.status(400).send({ error: error.details[0].message });
     }
+
+    let image = null;
+    if (req.file) {
+      const result = await cloudinary.uploader.upload(req.file.path);
+      console.log('Cloudinary upload result:', result); 
+      image = result ? result.secure_url : null;
+    }
+
+    const updatedBlog = await Blog.findByIdAndUpdate(
+      req.params.id,
+      { title, content, image },
+      { new: true }
+    );
+
+    if (!updatedBlog) {
+      return res.status(404).json({ error: 'Blog post not found' });
+    }
+
+    res.send({ updatedBlog, message: 'Blog updated!' });
+  } catch (err: any) {
+    return res.status(500).send({ message: (err as Error).message });
+  }
+};
 
 export const deleteBlogById = async (req: Request, res: Response) => {
   try {

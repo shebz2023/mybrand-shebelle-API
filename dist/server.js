@@ -16,7 +16,7 @@ const app = (0, express_1.default)();
 const PORT = process.env.PORT || 7000;
 const MONGO_URL = `mongodb+srv://shebz:shebz123@cluster0.iwskxk4.mongodb.net/blogdb?retryWrites=true&w=majority`;
 app.use(body_parser_1.default.json());
-// Enable CORS for all routes
+// Enable CORS
 app.use((0, cors_1.default)());
 // swagger
 const swaggerJsDocs = yamljs_1.default.load('./api.yaml');

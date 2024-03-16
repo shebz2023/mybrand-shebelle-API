@@ -15,7 +15,7 @@ const router = express_1.default.Router();
 router.get('/blogs', blogs_1.getAllBlogs);
 router.post('/blogs', auth_1.authenticateUser, auth_1.authorizeAdmin, multer_1.default.single("image"), blogs_1.createBlog);
 router.get('/blogs/:id', blogs_1.getBlogById);
-router.patch('/blogs/:id', auth_1.authenticateUser, auth_1.authorizeAdmin, blogs_1.updateBlogById);
+router.patch('/blogs/:id', auth_1.authenticateUser, auth_1.authorizeAdmin, multer_1.default.single("image"), blogs_1.updateBlogById);
 router.delete('/blogs/:id', auth_1.authenticateUser, auth_1.authorizeAdmin, blogs_1.deleteBlogById);
 router.post('/blogs/:id/like', auth_1.authenticateUser, liking_1.likePost);
 router.post('/blogs/:id/comment', auth_1.authenticateUser, blogs_1.addComment);

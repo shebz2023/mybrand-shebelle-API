@@ -13,7 +13,7 @@ const router = express.Router();
 router.get('/blogs', getAllBlogs);
 router.post('/blogs',authenticateUser,authorizeAdmin,upload.single("image"), createBlog);
 router.get('/blogs/:id', getBlogById);
-router.patch('/blogs/:id',authenticateUser,authorizeAdmin, updateBlogById);
+router.patch('/blogs/:id',authenticateUser,authorizeAdmin,upload.single("image"), updateBlogById);
 router.delete('/blogs/:id',authenticateUser,authorizeAdmin, deleteBlogById);
 router.post('/blogs/:id/like',authenticateUser, likePost);
 router.post('/blogs/:id/comment',authenticateUser, addComment);
