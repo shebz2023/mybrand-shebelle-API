@@ -16,7 +16,11 @@ const MONGO_URL = `mongodb+srv://shebz:shebz123@cluster0.iwskxk4.mongodb.net/blo
 app.use(bodyParser.json());
 
 // Enable CORS
-app.use(cors());
+app.use(cors({
+    origin: '*', 
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'], 
+    allowedHeaders: ['Content-Type', 'Authorization'],
+  }));
 
 // swagger
 const swaggerJsDocs = YAML.load('./api.yaml'); 
