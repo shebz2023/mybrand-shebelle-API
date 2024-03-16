@@ -5,6 +5,7 @@ import { likePost } from '../controllers/liking';
 import { createMessage, deleteMessageById, getAllMessages, getMessageById } from '../controllers/messages';
 import { createUser, deleteUserByEmail, getAllUsers, login } from '../controllers/users';
 import { authenticateUser, authorizeAdmin } from '../middlewares/auth';
+import { getSubs,getAllSubs,createSubs,deleteSubs } from '../controllers/subs';
 
 const router = express.Router();
 
@@ -24,6 +25,12 @@ router.get('/messages',authenticateUser,authorizeAdmin, getAllMessages);
 router.get('/messages/:id', authenticateUser,authorizeAdmin,getMessageById);
 router.post('/messages', createMessage);
 router.delete('/messages/:id', authenticateUser,authorizeAdmin,deleteMessageById);
+
+// subs
+router.get('/subs',authenticateUser,authorizeAdmin,getAllSubs);
+router.get('/subs/:id',authenticateUser,authorizeAdmin,getSubs);
+router.post('/subs',authenticateUser,authorizeAdmin,createSubs);
+router.delete('/subs/:id',authenticateUser,authorizeAdmin,deleteSubs)
 
 
 // accounts

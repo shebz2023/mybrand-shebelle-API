@@ -377,6 +377,120 @@ paths:
               status: "success"
               data: []
 
+  /subs:
+    post:
+      tags:
+        - "SUBS"
+      summary: "subscribe"
+      consumes:
+        - application/json
+      parameters:
+        - in: body
+          name: "email"
+          description: "Message object"
+          required: true
+          schema:
+            type: "object"
+            properties:
+              email:
+                type: "string"
+      responses:
+        '200':
+          description: "OK"
+          schema:
+            type: "object"
+            properties:
+              status:
+                type: "string"
+              data:
+                type: "array"
+                items: {}
+          examples:
+            success:
+              status: "success"
+              data: []
+
+    get:
+      tags:
+        - "SUBS"
+      summary: "Get all subs"
+      security:
+        - Token: []
+      responses:
+        '200':
+          description: "OK"
+          schema:
+            type: "object"
+            properties:
+              status:
+                type: "string"
+              data:
+                type: "array"
+                items: {}
+          examples:
+            success:
+              status: "success"
+              data: []
+
+  /subs/{id}:
+    get:
+      tags:
+        - "SUBS"
+      summary: "Get Subs by id"
+      security:
+        - Token: []
+      description: "Get subs by id"
+      parameters:
+        - name: "id"
+          in: "path"
+          description: "ID of the subscriber"
+          required: true
+          type: "string"
+      responses:
+        '200':
+          description: "OK"
+          schema:
+            type: "object"
+            properties:
+              status:
+                type: "string"
+              data:
+                type: "array"
+                items: {}
+          examples:
+            success:
+              status: "success"
+              data: []
+
+    delete:
+      tags:
+        - "SUBS"
+      summary: "Delete a subscriber"
+      description: "Delete a subscriber"
+      security:
+        - Token: []
+      parameters:
+        - name: "id"
+          in: "path"
+          description: "ID of the subs"
+          required: true
+          type: "string"
+      responses:
+        '200':
+          description: "OK"
+          schema:
+            type: "object"
+            properties:
+              status:
+                type: "string"
+              data:
+                type: "array"
+                items: {}
+          examples:
+            success:
+              status: "success"
+              data: []
+
   /users/:
     get:
       tags:

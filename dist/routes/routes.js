@@ -10,6 +10,7 @@ const liking_1 = require("../controllers/liking");
 const messages_1 = require("../controllers/messages");
 const users_1 = require("../controllers/users");
 const auth_1 = require("../middlewares/auth");
+const subs_1 = require("../controllers/subs");
 const router = express_1.default.Router();
 // blogs 
 router.get('/blogs', blogs_1.getAllBlogs);
@@ -24,6 +25,11 @@ router.get('/messages', auth_1.authenticateUser, auth_1.authorizeAdmin, messages
 router.get('/messages/:id', auth_1.authenticateUser, auth_1.authorizeAdmin, messages_1.getMessageById);
 router.post('/messages', messages_1.createMessage);
 router.delete('/messages/:id', auth_1.authenticateUser, auth_1.authorizeAdmin, messages_1.deleteMessageById);
+// subs
+router.get('/subs', auth_1.authenticateUser, auth_1.authorizeAdmin, subs_1.getAllSubs);
+router.get('/subs/:id', auth_1.authenticateUser, auth_1.authorizeAdmin, subs_1.getSubs);
+router.post('/subs', auth_1.authenticateUser, auth_1.authorizeAdmin, subs_1.createSubs);
+router.delete('/subs/:id', auth_1.authenticateUser, auth_1.authorizeAdmin, subs_1.deleteSubs);
 // accounts
 router.get('/users', auth_1.authenticateUser, auth_1.authorizeAdmin, users_1.getAllUsers);
 router.post('/login', users_1.login);
