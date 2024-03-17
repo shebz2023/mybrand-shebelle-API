@@ -303,7 +303,7 @@ describe("liking",() =>{
       .post(`/blogs/${blogId.blogID}/like`)
       .send({
         name: "mudanago",
-        email: "hhg@gmail.com",
+        email: "likingemail@gmail.com",
       })
       .set('Authorization', 'Bearer ' + token.token);
     expect(res.statusCode).toBe(500);
@@ -313,7 +313,7 @@ describe("liking",() =>{
       .post(`/blogs/${blogId.blogID}/like`)
       .send({
         email:"musabe@gmail.com",
-        postId:"65e9964b8707eb4c8870037d"
+        postId:`${blogId.blogID}`
       })
       .set('Authorization', 'Bearer ' + token.token);
     expect(res.statusCode).toBe(200);
@@ -324,7 +324,7 @@ describe("liking",() =>{
     .post(`/blogs/${blogId.blogID}/like`)
     .send({
       email:"musabe@gmail.com",
-      postId:`${blogId}`
+      postId:`${blogId.blogID}`
     })
     expect(res.statusCode).toBe(401);
   });

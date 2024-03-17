@@ -4,7 +4,7 @@
   "description": "backend",
   "main": "server.js",
   "scripts": {
-    "test": "jest --coverage",
+    "test": "jest --coverage --detectOpenHandles",
     "start": "node dist/server.js"
   },
   "author": "",
