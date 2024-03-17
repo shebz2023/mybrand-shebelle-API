@@ -11,7 +11,7 @@ const jwtSecret = 'mbapetorealmadridherewego';
 
 export const createUser = async (req: Request, res: Response) => {
   try {
-    const { username, password, email } = req.body;
+    const { username, password, email, role } = req.body;
 
     const { error } = signInVal.validate(req.body);
     if (error) {
@@ -25,7 +25,7 @@ export const createUser = async (req: Request, res: Response) => {
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    const newUser = new IUser({ username, password: hashedPassword, email });
+    const newUser = new IUser({ username, password: hashedPassword, email ,role});
     await newUser.save();
 
     const token = jwt.sign({ username: newUser.username, role: newUser.role }, jwtSecret, {

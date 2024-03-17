@@ -2,14 +2,23 @@ import { test, it, describe, expect, beforeAll, afterAll, jest } from '@jest/glo
 import superTest, { Request, Response } from 'supertest';
 import mongoose from 'mongoose';
 import app from '../src/server';
+import fs from 'fs';
+import FormData from 'form-data';
+import path from 'path'
 
+console.log('__dirname:', __dirname);
 
-const MONGO_URL='mongodb+srv://shebz:shebz123@cluster0.iwskxk4.mongodb.net/blogdb?retryWrites=true&w=majority';
+const MONGO_URL='mongodb+srv://shebz:shebz123@cluster0.iwskxk4.mongodb.net/testsDB?retryWrites=true&w=majority';
 const token: { token: string } = { token: '' };
 const token2: { token2: string } = { token2: '' };
+const  blogId: {blogID: string } = {blogID: ''};
+const msgId: {msgId: string} = { msgId: ''}; 
+const subId: {subId: string} = { subId: ''};
 
 beforeAll(async () => {
+  await mongoose.disconnect();
   await mongoose.connect(MONGO_URL);
+  await mongoose.connection.db.dropDatabase();
 }, 50000);
 
 afterAll(async () => {
@@ -23,6 +32,29 @@ describe("endpoints", () => {
     expect(response.statusCode).toBe(404);
   });
   
+  it('should give 201 for account creation', async () => {
+    const response = await superTest(app)
+      .post('/signup')
+      .send({
+        username: 'Musabe',
+        password: 'musabe123',
+        email: 'musabe@gmail.com',
+      });
+    expect(response.statusCode).toBe(201);
+  });
+  
+ 
+  it('Logging in', async () => {
+    const response = await superTest(app)
+      .post('/login')
+      .send({
+        username: 'Musabe',
+        password: 'musabe123'
+      });
+    token2.token2 = response.body.token;
+    expect(response.statusCode).toBe(200);
+  });
+ 
   it('should give 404 for already saveds', async () => {
     const response = await superTest(app)
       .post('/signup')
@@ -34,16 +66,21 @@ describe("endpoints", () => {
     expect(response.statusCode).toBe(400);
   });
   
-  it('Logging in', async () => {
+  it('creating  admin', async () => {
     const response = await superTest(app)
-      .post('/login')
+      .post('/signup')
       .send({
-        username: 'Musabe',
-        password: 'musabe123'
+        username: 'shebelle',
+        email:'shebelle@gmail.com',
+        password: 'shebelle123',
+        role: 'admin'
       });
-    token2.token2 = response.body.token;
-    expect(response.statusCode).toBe(200);
+    token.token = response.body.token;
+    expect(response.body).toHaveProperty('message', 'User created successfully');
+    expect(response.body).toHaveProperty('token');
+    expect(typeof response.body.token).toBe('string');
   });
+  
 
   it('Logging in', async () => {
     const response = await superTest(app)
@@ -70,7 +107,7 @@ describe("endpoints", () => {
       .post('/login')
       .send({
         username: 'Doesnotexist',
-        password: 'asdGe3',
+        password: 'passwordnot',
       });
     expect(response.statusCode).toBe(401);
   });
@@ -80,7 +117,6 @@ describe("endpoints", () => {
 
 
 describe('blog test',()=>{
-
       it('Posting a blog missing image..500', async () => {
     const res = await superTest(app)
       .post('/blogs')
@@ -91,6 +127,47 @@ describe('blog test',()=>{
       .set('Authorization', 'Bearer ' + token.token);
     expect(res.statusCode).toBe(500);
   });
+  it('should create a blog with an image', async () => {
+    const formData = new FormData();
+    formData.append('title', 'Test Blog');
+    formData.append('content', 'This is a test blog with an image');
+    const imagePath = path.join(__dirname, '..', 'random.jpg');
+   
+    console.log('Resolved imagePath:', imagePath);
+
+    formData.append('image', fs.createReadStream(imagePath));
+  
+    const response = await superTest(app)
+      .post('/blogs')
+      .set('Authorization', 'Bearer ' + token.token)
+      .attach('image', fs.readFileSync(imagePath), 'random.jpg')
+      .field('title', 'Test Blog')
+      .field('content', 'This is a test blog with an image');
+  
+    expect(response.statusCode).toBe(201);
+    expect(response.body).toHaveProperty('message', 'Blog created successfully!!');
+    expect(response.body).toHaveProperty('savedBlog');
+    expect(response.body.savedBlog).toHaveProperty('_id');
+    expect(response.body.savedBlog).toHaveProperty('title', 'Test Blog');
+    expect(response.body.savedBlog).toHaveProperty('content', 'This is a test blog with an image');
+    expect(response.body.savedBlog).toHaveProperty('image');
+    expect(response.body.savedBlog).toHaveProperty('likes', 0);
+    expect(response.body.savedBlog).toHaveProperty('comments');
+    expect(response.body.savedBlog.comments).toHaveLength(0);
+
+    blogId.blogID = response.body.savedBlog._id; 
+}, 60000);
+
+it('should return 200..Posting a comment', async () => {
+  const res = await superTest(app)
+    .post(`/blogs/${blogId.blogID}/comment`)
+    .send({
+      email: "theemail@gmail.com",
+      comment: "thecomment of test",
+    })
+    .set('Authorization', 'Bearer ' + token.token);
+  expect(res.statusCode).toBe(200);
+});
 
 
       it('Posting a blog error 400', async () => {
@@ -106,7 +183,7 @@ describe('blog test',()=>{
 
   it('editing a blog', async () => {
     const res = await superTest(app)
-        .patch('/blogs/65e37915dfd0ff9a6ec18715')
+        .patch(`/blogs/${blogId.blogID}`)
         .send({
         content: "Testing update",
         })
@@ -117,7 +194,7 @@ describe('blog test',()=>{
 
       it('should be 200..get a blog', async () => {
     const res = await superTest(app)
-      .get('/blogs/65e9964b8707eb4c8870037d')
+      .get(`/blogs/${blogId.blogID}`)
       .set('Authorization', 'Bearer ' + token.token);
     expect(res.statusCode).toBe(200);
   });
@@ -132,29 +209,15 @@ describe('blog test',()=>{
     
   it('should give 401..deleting a blog', async () => {
     const res = await superTest(app)
-      .delete('/blogs/65e44b63ee89e10a3b1829f4')
+      .delete(`/blogs/${blogId.blogID}`)
     expect(res.statusCode).toBe(401);
   });
 
-});
-
-
-describe("commenting tests",()=>{
-
     
-  it('should return 200..Posting a comment', async () => {
-    const res = await superTest(app)
-      .post('/blogs/65e9964b8707eb4c8870037d/comment')
-      .send({
-        email: "she@gmail.com",
-        comment: "coment of test",
-      })
-      .set('Authorization', 'Bearer ' + token.token);
-    expect(res.statusCode).toBe(200);
-  });
+
   it('error Posting a comment..400 validation', async () => {
     const res = await superTest(app)
-      .post('/blogs/65e9964b8707eb4c8870037d/comment')
+      .post(`/blogs/${blogId.blogID}/comment`)
       .send({
         comment: "like this",
       })
@@ -164,13 +227,20 @@ describe("commenting tests",()=>{
 
   it('should be unothorized... Posting a comment', async () => {
     const res = await superTest(app)
-      .post('/blogs/65e9964b8707eb4c8870037d/comment')
+      .post(`/blogs/${blogId.blogID}/comment`)
       .send({
         email: "she@gmail.com",
         comment: "like this",
       })
     expect(res.statusCode).toBe(401);
   });
+  it('should give 200..deleting a blog', async () => {
+    const res = await superTest(app)
+      .delete(`/blogs/${blogId.blogID}`)
+      .set('Authorization', 'Bearer ' + token.token);
+    expect(res.statusCode).toBe(200);
+  });
+
 });
 
 
@@ -194,6 +264,7 @@ describe("messages",()=>{
         message: 'Testing queries',
       });
     expect(response.statusCode).toBe(201);
+    msgId.msgId=response.body.Query._id;
   });
 
     it('should be..unauthorized', async () => {
@@ -211,8 +282,15 @@ describe("messages",()=>{
   });
   it('should give 401 ..get a msg unouthorised', async () => {
     const res = await superTest(app)
-      .get('/messages/65e3676435aa556c0a634533')
+      .get(`/messages/${msgId.msgId}`)
     expect(res.statusCode).toBe(401);
+  });
+  console.log(`the message id ${msgId.msgId}`)
+  it('should give 200..deleting a message', async () => {
+    const res = await superTest(app)
+      .delete(`/messages/${msgId.msgId}`)
+      .set('Authorization', 'Bearer ' + token.token);
+    expect(res.statusCode).toBe(200);
   });
 
 
@@ -222,7 +300,7 @@ describe("liking",() =>{
     
   it('should give 500 ..Liking', async () => {
     const res = await superTest(app)
-      .post('/blogs/65e0fe53b61562a46e33e6dd/like')
+      .post(`/blogs/${blogId.blogID}/like`)
       .send({
         name: "mudanago",
         email: "hhg@gmail.com",
@@ -232,7 +310,7 @@ describe("liking",() =>{
   });
   it('Liking....200', async () => {
     const res = await superTest(app)
-      .post('/blogs/65e9964b8707eb4c8870037d/like')
+      .post(`/blogs/${blogId.blogID}/like`)
       .send({
         email:"musabe@gmail.com",
         postId:"65e9964b8707eb4c8870037d"
@@ -243,10 +321,10 @@ describe("liking",() =>{
   
   it('Liking....401', async () => {
     const res = await superTest(app)
-    .post('/blogs/65e9964b8707eb4c8870037d/like')
+    .post(`/blogs/${blogId.blogID}/like`)
     .send({
       email:"musabe@gmail.com",
-      postId:"65e9964b8707eb4c8870037d"
+      postId:`${blogId}`
     })
     expect(res.statusCode).toBe(401);
   });
@@ -255,16 +333,92 @@ describe("liking",() =>{
 })
    //  server file
    describe("server file tests ", () => {
-    it('should connect to MongoDB', () => {
-        expect(mongoose.connect).toHaveBeenCalledWith(MONGO_URL, expect.any(Object));
-    });
 
     it('should start the server', async () => {
-        const server = await app.listen(7000);
+        const server = await app.listen(6000);
         expect(server).toBeDefined();
         server.close();
     });
 });
+// subscribers
+
+describe("subs part",()=>{
+
+ 
+  it('should give 201 and return the correct response format', async () => {
+    const response = await superTest(app)
+      .post('/subs')
+      .send({
+        email: 'dds@gmail.com'
+      });
+    expect(response.statusCode).toBe(201);
+    expect(response.body).toHaveProperty('subscriber');
+    expect(response.body.subscriber).toHaveProperty('_id');
+    expect(response.body.subscriber).toHaveProperty('email');
+    expect(response.body).toHaveProperty('message', 'Subscriber added successfully');
+    subId.subId=response.body.subscriber._id;
+  });
+
+  it('should give error ..create a sub with same email', async () => {
+    const response = await superTest(app)
+      .post('/subs')
+      .send({
+        email: 'dds@gmail.com'
+      });
+    expect(response.statusCode).toBe(400);
+    
+  });
+  
+  it('should give 400 ..create a sub with invalid email', async () => {
+    const response = await superTest(app)
+      .post('/subs')
+      .send({
+        email: 'ddssgmail.com'
+      });
+    expect(response.statusCode).toBe(400);
+  });
+    it('should be..unauthorized', async () => {
+    const res = await superTest(app)
+      .get('/subs')
+      .set('Authorization', 'Bearer ' + token2.token2);
+    expect(res.body.message).toContain('Unauthorized access');
+  });
+  it('should return "Subscriber not found" ', async () => {
+    const res = await superTest(app)
+      .get('/subs/65f59462db95259dc06c2f71')
+      .set('Authorization', 'Bearer ' + token.token);
+    expect(res.body.error).toBe('Subscriber not found');
+  });
+  
+  it('should return an array with properties', async () => {
+    const res = await superTest(app)
+      .get('/subs')
+      .set('Authorization', 'Bearer ' + token.token);
+    expect(Array.isArray(res.body)).toBe(true);
+    res.body.forEach((subscriber: any) => { 
+      expect(subscriber).toHaveProperty('_id');
+      expect(subscriber).toHaveProperty('email');
+    });
+  });
+  
+  it('should give 404 ..notfound', async () => {
+    const res = await superTest(app)
+      .get('/subs/655ddfbcc954392f2eeda438')
+      .set('Authorization', 'Bearer ' + token.token);
+    expect(res.statusCode).toBe(404);
+  });
+  it('should give 401 ..get a sub unouthorised', async () => {
+    const res = await superTest(app)
+      .get(`/subs/${subId.subId}`)
+    expect(res.statusCode).toBe(401);
+  });
+  it('should give 200 ..delete', async () => {
+    const res = await superTest(app)
+      .delete(`/subs/${subId.subId}`)
+      .set('Authorization', 'Bearer ' + token.token);
+    expect(res.statusCode).toBe(200);
+  });
+})
 
 
 

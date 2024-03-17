@@ -29,7 +29,7 @@ router.delete('/messages/:id', authenticateUser,authorizeAdmin,deleteMessageById
 // subs
 router.get('/subs',authenticateUser,authorizeAdmin,getAllSubs);
 router.get('/subs/:id',authenticateUser,authorizeAdmin,getSubs);
-router.post('/subs',authenticateUser,authorizeAdmin,createSubs);
+router.post('/subs',createSubs);
 router.delete('/subs/:id',authenticateUser,authorizeAdmin,deleteSubs)
 
 

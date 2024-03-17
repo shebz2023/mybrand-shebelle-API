@@ -28,7 +28,7 @@ router.delete('/messages/:id', auth_1.authenticateUser, auth_1.authorizeAdmin, m
 // subs
 router.get('/subs', auth_1.authenticateUser, auth_1.authorizeAdmin, subs_1.getAllSubs);
 router.get('/subs/:id', auth_1.authenticateUser, auth_1.authorizeAdmin, subs_1.getSubs);
-router.post('/subs', auth_1.authenticateUser, auth_1.authorizeAdmin, subs_1.createSubs);
+router.post('/subs', subs_1.createSubs);
 router.delete('/subs/:id', auth_1.authenticateUser, auth_1.authorizeAdmin, subs_1.deleteSubs);
 // accounts
 router.get('/users', auth_1.authenticateUser, auth_1.authorizeAdmin, users_1.getAllUsers);

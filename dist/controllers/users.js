@@ -20,7 +20,7 @@ const users_1 = require("../validations/users");
 const jwtSecret = 'mbapetorealmadridherewego';
 const createUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const { username, password, email } = req.body;
+        const { username, password, email, role } = req.body;
         const { error } = users_1.signInVal.validate(req.body);
         if (error) {
             return res.status(400).json({ error: error.details[0].message });
@@ -30,7 +30,7 @@ const createUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
             return res.status(400).json({ message: 'User already exists' });
         }
         const hashedPassword = yield bcrypt_1.default.hash(password, 10);
-        const newUser = new User_1.default({ username, password: hashedPassword, email });
+        const newUser = new User_1.default({ username, password: hashedPassword, email, role });
         yield newUser.save();
         const token = jsonwebtoken_1.default.sign({ username: newUser.username, role: newUser.role }, jwtSecret, {
             expiresIn: '2h'
