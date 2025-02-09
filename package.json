@@ -5,8 +5,8 @@
   "main": "server.js",
   "scripts": {
     "test": "jest --coverage --detectOpenHandles",
-    "start": "node dist/server.js",
-    "dev":"ts-node ./src/server.ts"
+    "start":"node dist/server.js",
+    "dev": "ts-node ./src/server.ts"
   },
   "author": "",
   "license": "ISC",
